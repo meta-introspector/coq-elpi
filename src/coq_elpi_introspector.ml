@@ -2,42 +2,41 @@
    Copyright (C) 2023 James DuPont. All Rights Reserved.
    *)
 
-open CErrors
-open Constr
-open Context
-open EConstr
-open Environ
-open Evarutil
-open Evd
-open Genarg
+(* open CErrors *)
+(* open Constr *)
+(* open Context *)
+(* open EConstr *)
+(* open Environ *)
+(* open Evarutil *)
+(* open Evd *)
+(* open Genarg *)
 open Gramlib
-open Logic
-open Ltac_plugin
-open Nameops
-open Names
-open Pp
-open Pretype_errors
-open Vernac_classifier
-open Vernacexpr
-open Vernacextend
-open Vernacinterp
-open Vernacprop
-open Vernacstate
-open WorkerPool
-open Pvernac
-open Range
-open Reductionops
-open Sertop.Sertop_init
-open Tacred
-open Tactypes
-open Termops
-open Tok
-open Pcoq
-open Unification
-open Util
-open Vars
-open! Sexplib.Conv
-open Yojson
+(* open Logic *)
+(* open Ltac_plugin *)
+(* open Nameops *)
+(* open Names *)
+(* open Pp *)
+(* open Pretype_errors *)
+(* open Vernac_classifier *)
+(* open Vernacexpr *)
+(* open Vernacextend *)
+(* open Vernacinterp *)
+(* open Vernacprop *)
+(* open Vernacstate *)
+(* open Pvernac *)
+(* open Range *)
+(* open Reductionops *)
+open Sertop.Sertop_init 
+(* open Tacred *)
+(* open Tactypes *)
+(* open Termops *)
+(* open Tok *)
+(* open Pcoq *)
+(* open Unification *)
+(* open Util *)
+(* open Vars *)
+(* open! Sexplib.Conv *)
+(* open Yojson *)
     
 module Loc = Serlib.Ser_loc
 module Names = Serlib.Ser_names
@@ -53,10 +52,21 @@ The `flush stdout` command at the end of the code ensures that any buffered outp
 *)
                       
 let vernac_pperr_endline2 = CDebug.create ~name:"vernacinterp2" ()
-    
+
 let get_default_proof_mode()=
   match Pvernac.lookup_proof_mode "Noedit" with
-    Some x -> x;;
+  | Some x -> x;
+  | None -> failwith "FOO";;
+
+let eval_stuff(ff)=
+  match ff with
+  |Some x ->
+    vernac_pperr_endline2 Pp.(fun () -> str "interpreting: " ++ Ppvernac.pr_vernac x);
+    Printf.printf "something";
+    "a";
+  | None ->
+    Printf.printf "no data";
+    "b";;
 
 let step (s:string ) : string =
   coq_init
@@ -75,27 +85,22 @@ let step (s:string ) : string =
   let s1 = (Stream.of_string s) in
   let pa = Pcoq.Parsable.make s1 in
   try
-    let ff = Vernacstate.Parser.parse p1 (Pvernac.main_entry (Some (get_default_proof_mode ()))) pa in 
+    let ff = Vernacstate.Parser.parse p1 (Pvernac.main_entry (Some (get_default_proof_mode ()))) pa in
+    let foo = (eval_stuff(ff)) in 
     Printf.printf "in token test: '%s'" s;
-
-    match ff with
-    |Some x -> vernac_pperr_endline2 Pp.(fun () -> str "interpreting: " ++ Ppvernac.pr_vernac x); Printf.printf "something"; "token"
-    | None ->     Printf.printf "no data"; "Nope";
-
-
+    Printf.printf "in token test2: '%s'" foo;
     flush stdout;
-    "DONE:" ^ s ^ "OUTPUT:\n";
+    "DONE:" ^ s ^ "OUTPUT:\n" ^ foo;
   with
-  | Gramlib.Grammar.Error x->
-    Printf.printf "error1 error: '%s'" x;
-    Printf.printf "error1 input: '%s'" s;
-    flush stdout;
-    "return err1 ";
+  (* | Gramlib.Grammar.Error x-> *)
+  (*   Printf.printf "error1 error: '%s'" x; *)
+  (*   Printf.printf "error1 input: '%s'" s; *)
+  (*   flush stdout; *)
+  (*   "return err1 "; *)
   | CLexer.Error.E x ->    
     Printf.printf "error2 error: '%s'" (CLexer.Error.to_string x);
     Printf.printf "error2 input: '%s'" s;
     flush stdout;
-    "return err2 ";    
     "return value ";;
 
 let init () =

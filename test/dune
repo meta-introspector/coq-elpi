@@ -1,0 +1,7 @@
+(executable
+ (name        "foo")
+ (public_name "foo")
+ (modules     "foo")
+ (flags :standard -rectypes -w -9-27) 
+ (libraries   coq_elpi))
+ 

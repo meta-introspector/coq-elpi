@@ -1,5 +1,6 @@
 
 # detection of coq
+COQBIN=/mnt/data1/2023/07/06/.opam/default/bin/
 ifeq "$(COQBIN)" ""
 COQBIN := $(shell which coqc >/dev/null 2>&1 && dirname `which coqc`)
 endif
